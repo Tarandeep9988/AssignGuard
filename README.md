@@ -6,12 +6,6 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -53,7 +47,7 @@ A lightweight assignment originality checker for students and teachers. Supports
 - Node.js, Express / Next API Routes
 - MongoDB + Mongoose
 - PDF text extraction (`pdf-parse`)
-- Similarity algorithms + NLP preprocessing
+- Similarity algorithms
 
 ## 📦 Setup
 ```bash
