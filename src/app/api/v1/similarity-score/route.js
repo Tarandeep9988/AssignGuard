@@ -15,7 +15,7 @@ export async function POST(request) {
   // Placeholder similarity score calculation (for demonstration purposes)
   const similarityScore = calculateSimilarity(text1, text2)
 
-  return new Response(JSON.stringify({ similarityScore }), {
+  return new Response(JSON.stringify({ data: { similarityScore } }), {
     headers: { 'Content-Type': 'application/json' },
   })
   } catch (error) {
