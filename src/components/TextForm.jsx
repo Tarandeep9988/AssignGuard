@@ -7,6 +7,7 @@ import { useRef } from "react";
 const TextForm = () => {
   const textArea1Ref = useRef("");
   const textArea2Ref = useRef("");
+  const similarityScoreRef = useRef("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,6 +17,7 @@ const TextForm = () => {
       text2: textArea2Ref.current.value,
     })
     .then(response => {
+      similarityScoreRef.current.textContent = response.data.data.similarityScore * 100 + "%";
       console.log("Similarity Score:", response.data.data.similarityScore);
     })
     .catch(error => {
@@ -41,6 +43,9 @@ const TextForm = () => {
         <button className="border rounded-lg cursor-pointer">
           Compare
         </button>
+        <p>
+          Similarity Score: <span ref={similarityScoreRef}></span>
+        </p>
       </form>
     </div>
   )
