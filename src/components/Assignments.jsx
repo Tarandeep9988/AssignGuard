@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useState } from "react";
 
 const Assignments = () => {
@@ -11,26 +12,41 @@ const Assignments = () => {
     deadline: "",
   });
 
-  const handleUpload = (e) => {
+  const handleUpload = async (e) => {
     e.preventDefault();
-    if (newAssignment.title && newAssignment.deadline) {
-      const assignment = {
-        id: Date.now(),
-        ...newAssignment,
-      };
-      setAssignments([...assignments, assignment]);
+    if (!newAssignment.title || !newAssignment.deadline) {
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/v1/assignment", {
+        title: newAssignment.title,
+        description: newAssignment.description,
+        deadline: newAssignment.deadline,
+      });
+
+      const savedAssignment = response.data?.data?.assignment;
+      if (savedAssignment) {
+        setAssignments([...assignments, savedAssignment]);
+      }
+
       setNewAssignment({ title: "", description: "", deadline: "" });
       setShowUploadForm(false);
+    } catch (error) {
+      console.error("Error uploading assignment:", error);
     }
   };
 
+  const getAssignmentId = (assignment) => assignment?._id || assignment?.id;
+
   const handleDelete = (id) => {
-    setAssignments(assignments.filter((assignment) => assignment.id !== id));
+    setAssignments(
+      assignments.filter((assignment) => getAssignmentId(assignment) !== id)
+    );
   };
 
   const handleSubmit = (assignment) => {
     alert(`Submitting to: ${assignment.title}`);
-    // Handle submission logic here
   };
 
   return (
@@ -124,7 +140,7 @@ const Assignments = () => {
           ) : (
             assignments.map((assignment) => (
               <div
-                key={assignment.id}
+                key={getAssignmentId(assignment)}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
               >
                 <div className="flex justify-between items-start mb-4">
@@ -143,6 +159,12 @@ const Assignments = () => {
                         {new Date(assignment.deadline).toLocaleString()}
                       </span>
                     </div>
+                    <div className="flex items-center gap-2 text-sm mt-2">
+                      <span className="font-medium text-gray-700">Key:</span>
+                      <span className="text-gray-600 font-mono text-xs">
+                        {getAssignmentId(assignment)}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -153,7 +175,7 @@ const Assignments = () => {
                     Submit
                   </button>
                   <button
-                    onClick={() => handleDelete(assignment.id)}
+                    onClick={() => handleDelete(getAssignmentId(assignment))}
                     className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
                   >
                     Delete

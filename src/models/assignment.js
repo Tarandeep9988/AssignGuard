@@ -10,16 +10,18 @@ const assignmentSchema = new mongoose.Schema({
   },
   deadline: {
     type: Date,
-    required: true,
+    
   },
   createdBy: {
     type: mongoose.Types.ObjectId,
     ref: 'User',
-    required: true,
+    
   },  
 }, {timestamps: true});
 
 
-const Assignment = mongoose.model('Assignment', assignmentSchema);
+const Assignment =
+  mongoose.models.Assignment ||
+  mongoose.model("Assignment", assignmentSchema);
 
 export default Assignment;
