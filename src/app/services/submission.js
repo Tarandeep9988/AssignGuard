@@ -1,21 +1,41 @@
-import submissionModel from "@/models/submission";
+import AssignmentModel from "@/models/assignment";
+import SubmissionModel from "@/models/submission";
 import { createSubmissionSchema } from "@/schemas/submission";
 
-export async function addSubmissionService(body) {
+export async function addSubmissionService(data) {
   // For now, just return the validated data. In a real implementation, this would save to the database.
-  const { assignmentId, userId, fileUrl, submittedAt, status } = body;
+  const { assignmentId, title, content} = data;
 
-  const submission = await submissionModel.create({
+  // check if assignmentId exists
+  const assignment = await AssignmentModel.findById(assignmentId);
+  if (!assignment) {
+    throw new Error("Assignment not found");
+  }
+
+  const status = new Date() <= new Date() ? "ON_TIME" : "LATE"; 
+  const submission = await SubmissionModel.create({
     assignmentId,
-    userId,
-    fileUrl,
-    submittedAt,
+    title,
+    content,
     status,
   });
-  return submission;
+
+  // _id -> id
+  const submissionObj = submission.toObject({ versionKey: false });
+  submissionObj.id = submissionObj._id;
+  delete submissionObj._id;
+
+  return submissionObj;
 }
 
 export async function deleteSubmissionService(id) {
-  const submission = await submissionModel.findByIdAndDelete(id);
+  const submission = await SubmissionModel.findByIdAndDelete(id);
+  
+  if (submission) {
+    const submissionObj = submission.toObject({ versionKey: false });
+    submissionObj.id = submissionObj._id;
+    delete submissionObj._id;
+    return submissionObj;
+  }
   return submission;
 }

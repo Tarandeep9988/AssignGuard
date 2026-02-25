@@ -1,4 +1,8 @@
+import { deleteSubmissionController } from "@/controllers/submission";
+import connectDb from "@/lib/mongodb";
+
 export async function DELETE(request, { params }) {
   await connectDb();
-  return deleteSubmissionController(params);
+  const { id } = await params;
+  return deleteSubmissionController({ id });
 }
