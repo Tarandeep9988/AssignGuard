@@ -17,3 +17,13 @@ export async function deleteAssignmentService(id) {
   }
   return assignmentObj;
 }
+
+export async function getAssignmentsService() {
+  const assignments = await Assignment.find().select("-__v").lean();
+
+  return assignments.map(assignment => {
+    assignment.id = assignment._id;
+    delete assignment._id;
+    return assignment;
+  });
+}

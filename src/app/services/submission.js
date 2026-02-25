@@ -39,3 +39,13 @@ export async function deleteSubmissionService(id) {
   }
   return submission;
 }
+
+export async function getSubmissionsService(assignmentId) {
+  const submissions = await SubmissionModel.find({ assignmentId }).select("-__v").lean();
+  return submissions.map(submission => {
+    submission.id = submission._id;
+    delete submission._id;
+    return submission;
+  });
+}
+

@@ -1,4 +1,4 @@
-import { addAssignmentService, deleteAssignmentService } from "@/app/services/assignment";
+import { addAssignmentService, deleteAssignmentService, getAssignmentsService } from "@/app/services/assignment";
 import { createAssignmentSchema, deleteAssignmentSchema } from "@/schemas/assignment";
 import { NextResponse } from "next/server";
 
@@ -57,7 +57,7 @@ export async function deleteAssignmentController(data) {
         message: "Assignment not found",
       }, { status: 404 });
     }
-    
+
     return NextResponse.json({
       success: true,
       message: "Assignment deleted successfully",
@@ -72,3 +72,22 @@ export async function deleteAssignmentController(data) {
     }, { status: 500 });
   }
 }
+
+export async function getAssignmentsController() {
+  try {
+
+    const assignments = await getAssignmentsService();
+
+    return NextResponse.json({
+      success: true,
+      assignments,
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Get assignments controller error:", error);
+    return NextResponse.json({
+      success: false,
+      message: error.message || "Error processing request",
+    }, { status: 500 });
+  }
+};

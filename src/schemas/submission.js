@@ -6,3 +6,10 @@ export const createSubmissionSchema = z.object({
   content: z.string().min(1, "Content is required"),
 }).strict();
 
+export const getSubmissionsSchema = z.object({
+  assignmentId: z.string().min(1, "Assignment ID is required"),
+}).strict();
+
+export const deleteSubmissionSchema = z.object({
+  id: z.string().min(1, "Submission ID is required"),
+}).strict();

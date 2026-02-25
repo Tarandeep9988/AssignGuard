@@ -1,5 +1,5 @@
-import { addSubmissionService, deleteSubmissionService } from "@/app/services/submission";
-import { createSubmissionSchema } from "@/schemas/submission";
+import { addSubmissionService, deleteSubmissionService, getSubmissionsService } from "@/app/services/submission";
+import { createSubmissionSchema, getSubmissionsSchema } from "@/schemas/submission";
 import { NextResponse } from "next/server";
 
 export async function addSubmissionController(data) {
@@ -51,7 +51,7 @@ export async function deleteSubmissionController(data) {
       );
     }
     const submission = await deleteSubmissionService(id);
-    
+
     if (!submission) {
       return NextResponse.json(
         {
@@ -74,6 +74,40 @@ export async function deleteSubmissionController(data) {
       {
         success: false,
         message: error.message || "Error deleting submission",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function getSubmissionsController({ assignmentId }) {
+  try {
+    const result = getSubmissionsSchema.safeParse({ assignmentId });
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid data",
+        },
+        { status: 400 }
+      );
+    }
+
+    const submissions = await getSubmissionsService(assignmentId);
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          submissions,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message || "Error fetching submissions",
       },
       { status: 500 }
     );
