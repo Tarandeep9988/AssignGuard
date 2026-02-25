@@ -2,24 +2,23 @@ import mongoose from "mongoose";
 
 const submissionSchema = new mongoose.Schema({
   assignmentId: {
-    type: mongoose.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Assignment',
     required: true,
   },
-  userId: {
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  fileUrl: {
+  title: {
     type: String,
     required: true,
   },
-  submittedAt: {
-    type: Date,
+  content: {
+    type: String,
     required: true,
   },
-  status: ["ON_TIME", "LATE"],
+  status: {
+    type: String,
+    enum: ["ON_TIME", "LATE"],
+    required: true,
+  },
 }, {timestamps: true});
 
 const submissionModel = mongoose.model('Submission', submissionSchema);
