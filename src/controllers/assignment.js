@@ -1,67 +1,74 @@
 import { addAssignmentService, deleteAssignmentService } from "@/app/services/assignment";
-import { createAssignmentSchema } from "@/schemas/assignment";
+import { createAssignmentSchema, deleteAssignmentSchema } from "@/schemas/assignment";
+import { NextResponse } from "next/server";
 
-export async function addAssignmentController(request) {
-  // validate request body
+export async function addAssignmentController(data) {
   try {
-    const body = await request.json();
-    const result = createAssignmentSchema.safeParse(body);
+    const result = createAssignmentSchema.safeParse(data);
     if (!result.success) {
-      return new Response(
-        JSON.stringify({
+      return NextResponse.json(
+        {
           success: false,
           message: "Invalid data",
-        }),
+        },
         { status: 400 }
       );
     }
 
     const assignment = await addAssignmentService(result.data);
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         success: true,
         data: {
           assignment,
         },
-      }),
+      },
       { status: 201 }
     );
 
   } catch (error) {
     console.error("Assignment controller error:", error);
-    return new Response(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         success: false,
         message: error.message || "Error processing request",
-      }),
+      },
       { status: 500 }
     );
   }
 };
 
 
-export async function deleteAssignmentController(params) {
+export async function deleteAssignmentController(data) {
   try {
+    const id = data.id;
+    const result = deleteAssignmentSchema.safeParse({ id });
+    if (!result.success) {
+      return NextResponse.json({
+        success: false,
+        message: "Invalid data",
+      }, { status: 400 });
+    }
     
-    const id = (await params).id;
-    console.log("Deleting assignment with id:", id);
     const assignment = await deleteAssignmentService(id);
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Assignment deleted successfully",
-        assignment,
-      }),
-      { status: 200 }
-    );
+    if (!assignment) {
+      return NextResponse.json({
+        success: false,
+        message: "Assignment not found",
+      }, { status: 404 });
+    }
+    
+    return NextResponse.json({
+      success: true,
+      message: "Assignment deleted successfully",
+      assignment,
+    }, { status: 200 });  
+
   } catch (error) {
     console.error("Delete assignment controller error:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        message: error.message || "Error processing request",
-      }),
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: error.message || "Error processing request",
+    }, { status: 500 });
   }
 }

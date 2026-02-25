@@ -1,10 +1,19 @@
 import Assignment from "@/models/assignment";
 
-export async function addAssignmentService(body) {
-  // already validated by controller, can directly save to database
-  return await Assignment.create(body);
+export async function addAssignmentService(data) {
+  const assignment = await Assignment.create(data);
+  const assignmentObj = assignment.toObject({versionKey: false});
+  assignmentObj.id = assignmentObj._id;
+  delete assignmentObj._id;
+  return assignmentObj;
 }
 
 export async function deleteAssignmentService(id) {
-  return await Assignment.findByIdAndDelete(id);
+  const assignment = await Assignment.findByIdAndDelete(id);
+  const assignmentObj = assignment ? assignment.toObject({versionKey: false}) : null;
+  if (assignment) {
+    assignmentObj.id = assignmentObj._id;
+    delete assignmentObj._id;
+  }
+  return assignmentObj;
 }

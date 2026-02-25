@@ -8,5 +8,8 @@ export const createAssignmentSchema = z.object({
     {
       message: "Deadline must be a future date"
     }),
-  createdBy: z.string().optional(),
+}).strict();
+
+export const deleteAssignmentSchema = z.object({
+  id: z.string().min(1, "Assignment ID is required"),
 }).strict();

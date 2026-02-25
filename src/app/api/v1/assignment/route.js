@@ -3,5 +3,6 @@ import connectDb from "@/lib/mongodb";
 
 export async function POST(request) {
   await connectDb();
-  return addAssignmentController(request);
+  const body = await request.json();
+  return addAssignmentController(body);
 }

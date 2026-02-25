@@ -1,4 +1,7 @@
+import { addSubmissionController } from "@/controllers/submission";
+import connectDb from "@/lib/mongodb"
+
 export async function POST(request) {
-  const body = await request.json()
-  return new Response('Received submission data: ' + JSON.stringify(body))
+  await connectDb();
+  return addSubmissionController(request);
 }
