@@ -13,7 +13,7 @@ const assignmentSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  UserId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
