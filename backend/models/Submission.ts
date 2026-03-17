@@ -13,11 +13,16 @@ const assignmentSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  UserId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
+  assignmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Assignment',
+    required: true,
+  },
 }, { timestamps: true });
 
-export default mongoose.model('Assignment', assignmentSchema);
+export default mongoose.model('Submission', assignmentSchema);
