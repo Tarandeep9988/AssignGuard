@@ -5,6 +5,7 @@ import userRouter from "./routes/user.ts";
 import submissionRouter from "./routes/submission.ts";
 import assignmentRouter from "./routes/assignment.ts";
 import healthRouter from "./routes/health.ts";
+import helmet from "helmet";
 
 await connectDb();
 
@@ -12,6 +13,7 @@ const app = express();
 
 
 // middlewares
+app.use(helmet());
 app.use(express.json());
 
 
