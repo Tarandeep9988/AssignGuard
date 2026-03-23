@@ -31,6 +31,22 @@ export async function createUser({ name, email, role, password }: CreateUserPara
   }
 }
 
+export async function getUserByEmail(email: String) {
+  try {
+    const user = await User.findOne({ email });
+    return user;
+  } catch (error) {
+    throw new AppError({
+      message: "Error getting user by email: " + (error instanceof Error ? error.message : "Unknown error"),
+      statusCode: 500,
+    })
+  }
+}
+
+export async function isValidPassword({ password, user } : { password: string, user: mongoose.Document }) {
+  return password === user.get("password");
+}
+
 export async function getUserById({ id }: GetUserByIdParams) {
   try {
     const user = await User.findById(id);

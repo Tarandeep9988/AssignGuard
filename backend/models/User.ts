@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true, // Uniqueness is enforced at db level through indexing below
   },
   role: {
     type: String,
@@ -20,5 +20,9 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 }, {timestamps: true});
+
+// Setting indexing on email for faster queries and ensuring uniqueness
+userSchema.index({ email: 1 }, { unique: true });
+
 
 export default mongoose.model("User", userSchema);
