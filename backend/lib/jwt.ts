@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 export function signToken({userId} : {userId: mongoose.Types.ObjectId}): string {
-  return jwt.sign(userId, JWT_SECRET, {
+  return jwt.sign({userId}, JWT_SECRET, {
     expiresIn: '1h',
   });
 }

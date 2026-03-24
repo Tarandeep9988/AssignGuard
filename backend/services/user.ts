@@ -1,72 +1,84 @@
 import mongoose from "mongoose";
 import User from "../models/User";
 import { AppError } from "../utils/AppError";
+import bcrypt from "bcrypt";
 
-interface CreateUserParams {
+async function createUser({
+  name,
+  email,
+  role,
+  password,
+}: {
   name: string;
   email: string;
   role: "student" | "teacher";
   password: string;
-}
-
-interface GetUserByIdParams {
-  id: mongoose.Types.ObjectId;
-}
-
-interface DeleteUserByIdParams {
-  id: mongoose.Types.ObjectId;
-}
-
-export async function createUser({ name, email, role, password }: CreateUserParams) {
-  try {
-    const user = new User({ name, email, role, password });
-    await user.save();
-    return user;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+}) {
+  const existingUser = await User.findOne({email});
+  if (existingUser) {
     throw new AppError({
-      message: "Error creating user: " + errorMessage,
-      statusCode: 500,
+      message: "User with this email already exists",
+      statusCode: 400,
     });
   }
+  const SALT_ROUNDS = 10; 
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+  
+  const newUser = await User.create({name, email, role, password: hashedPassword });
+  return newUser;
 }
 
-export async function getUserByEmail(email: String) {
-  try {
-    const user = await User.findOne({ email });
-    return user;
-  } catch (error) {
-    throw new AppError({
-      message: "Error getting user by email: " + (error instanceof Error ? error.message : "Unknown error"),
-      statusCode: 500,
-    })
+async function getUserByCredentials({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
+    return null;
   }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return null;
+  }
+  return user;
 }
 
-export async function isValidPassword({ password, user } : { password: string, user: mongoose.Document }) {
-  return password === user.get("password");
-}
-
-export async function getUserById({ id }: GetUserByIdParams) {
+async function getUserById({ id }: { id: mongoose.Types.ObjectId }) {
   try {
     const user = await User.findById(id);
     return user;
   } catch (error) {
     throw new AppError({
-      message: "Error getting user: " + (error instanceof Error ? error.message : "Unknown error"),
+      message:
+        "Error getting user: " +
+        (error instanceof Error ? error.message : "Unknown error"),
       statusCode: 500,
     });
   }
 }
 
-export async function deleteUserById({ id }: DeleteUserByIdParams) {
+async function deleteUserById({ id }: { id: mongoose.Types.ObjectId }) {
   try {
     const user = await User.findByIdAndDelete(id);
     return user;
   } catch (error) {
     throw new AppError({
-      message: "Error deleting user: " + (error instanceof Error ? error.message : "Unknown error"),
+      message:
+        "Error deleting user: " +
+        (error instanceof Error ? error.message : "Unknown error"),
       statusCode: 500,
     });
   }
 }
+
+const userServices = {
+  createUser,
+  getUserById,
+  getUserByCredentials,
+  deleteUserById,
+};
+
+export default userServices;
