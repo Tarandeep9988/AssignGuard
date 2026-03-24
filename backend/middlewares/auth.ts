@@ -28,3 +28,33 @@ export async function authenticate(req : Request, res: Response, next: NextFunct
     next(error);
   }
 }
+
+export async function authorizeTeacher(req : Request, res: Response, next: NextFunction) {
+  try {
+    const user = res.locals.user;
+    if (user.role !== "teacher") {
+      throw new AppError({
+        statusCode: 403,
+        message: "Unauthorized : Teacher role required",
+      })
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function authorizeStudent(req : Request, res: Response, next: NextFunction) {
+  try {
+    const user = res.locals.user;
+    if (user.role !== "student") {
+      throw new AppError({
+        statusCode: 403,
+        message: "Unauthorized : Student role required",
+      })
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
