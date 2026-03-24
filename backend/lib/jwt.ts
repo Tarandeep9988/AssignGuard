@@ -1,5 +1,6 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt, { Jwt, JwtPayload, SignOptions } from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import { AppError } from '../utils/AppError';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
@@ -9,21 +10,21 @@ export function signToken({userId} : {userId: mongoose.Types.ObjectId}): string 
   });
 }
 
+
+
 export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET);
+  try {
+    return jwt.verify(token, JWT_SECRET) as JwtPayload;
+    // extract payload from token and return it
+  } catch (error) {
+    throw new AppError({
+      statusCode: 401,
+      message: "Invalid token",
+    });
+  }
 }
 
 export function decodeToken(token: string) {
   return jwt.decode(token);
 }
-
-export function getTokenFromHeader(header: string): string | null {
-  if (!header) return null;
-  const parts = header.split(' ');
-  if (parts.length === 2 && parts[0] === 'Bearer') {
-    return parts[1];
-  }
-  return null;
-}
-
 

@@ -6,7 +6,9 @@ import assignmentRouter from "./routes/assignment.ts";
 import healthRouter from "./routes/health.ts";
 import helmet from "helmet";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.ts";
+
 import { errorHandler } from "./middlewares/error.ts";
 
 await connectDb();
@@ -17,6 +19,7 @@ const app = express();
 // middlewares
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 // logging 
 app.use(morgan("dev"));
 
