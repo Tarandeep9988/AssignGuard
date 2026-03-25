@@ -27,10 +27,11 @@ userSchema.index({ email: 1 }, { unique: true });
 
 
 userSchema.set("toJSON", {
-  transform: (doc, ret: { _id?: any; password?: string; id?: string }) => {
+  transform: (doc, ret: { _id?: any, password?: any, id?: any, __v?: any}) => {
     ret.id = ret._id; 
     delete ret._id;
     delete ret.password;
+    delete ret.__v;
     return ret;
   },
 });

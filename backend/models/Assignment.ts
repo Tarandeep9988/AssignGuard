@@ -20,4 +20,15 @@ const assignmentSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+assignmentSchema.index({ userId: 1 });
+
+assignmentSchema.set('toJSON', {
+  transform: function (doc, ret : { _id? : any, __v? : any, id? : any }) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+    return ret
+  }
+});
+
 export default mongoose.model('Assignment', assignmentSchema);
