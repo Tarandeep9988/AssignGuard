@@ -26,18 +26,37 @@ interface GetAssignmentParams {
   id: mongoose.Types.ObjectId;
 }
 
-async function getAssignment({ id } : { id: mongoose.Types.ObjectId | string}) {
+
+async function getAssignmentById({ assignmentId, userId }: { assignmentId: string, userId: mongoose.Types.ObjectId }) {
   try {
-    const assignment = await Assignment.findByIdAndDelete(id);
+    const assignment = await Assignment.findOne({ _id: assignmentId, userId });
     return assignment;
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     throw new AppError({
       message: "Error fetching assignment: " + errorMessage,
       statusCode: 500,
     });
   }
+}
+
+async function updateAssignment({ assignmentId, userId, title, description, dueDate }: {
+  assignmentId: string,
+  userId: mongoose.Types.ObjectId,
+  title?: string,
+  description?: string,
+  dueDate?: string,
+}) {
+  const update: any = {};
+  if (title !== undefined) update.title = title;
+  if (description !== undefined) update.description = description;
+  if (dueDate !== undefined) update.dueDate = new Date(dueDate);
+  const assignment = await Assignment.findOneAndUpdate(
+    { _id: assignmentId, userId },
+    { $set: update },
+    { new: true }
+  );
+  return assignment;
 }
 
 
@@ -67,10 +86,12 @@ async function deleteAssignment({ id }: {
   }
 }
 
+
 const assignmentServices = {
   createAssignment,
-  getAssignment,
+  getAssignmentById,
   getAssignmentsByUserId,
+  updateAssignment,
   deleteAssignment,
 }
 
