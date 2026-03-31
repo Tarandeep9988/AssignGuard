@@ -135,9 +135,41 @@ async function deleteAssignment(req: Request, res: Response, next: NextFunction)
   }
 }
 
+// Controller to handle plagiarism report
+
+
+async function getPlagiarismReport(req: Request, res: Response, next: NextFunction) {
+  try {
+    const response = z.object({
+      assignmentId: z.string().min(1),
+    }).safeParse({...req.params, ...req.body});
+
+    if (!response.success) {
+      throw new AppError({
+        statusCode: 400,
+        message: "Invalid assignmentId parameter",
+      });
+    }
+    const { assignmentId } = response.data;
+
+    // const report = await assignmentServices.getPlagiarismReport({
+    //   assignmentId,
+    // });
+
+    return res.status(200).json({
+      success: true,
+      message: "Plagiarism report generation is not implemented yet",
+    })
+
+  } catch (error) {
+    next(error);
+  }
+}
+
 const assignmentController = {
   getAllAssignments,
   getAssignmentById,
+  getPlagiarismReport,  
   createAssignment,
   // updateAssignment,
   deleteAssignment,

@@ -11,4 +11,7 @@ assignmentRouter.post('/assignments', authenticate, authorizeTeacher, assignment
 // assignmentRouter.delete('/assignments/:assignmentId', authenticate, authorizeTeacher, assignmentController.deleteAssignment);
 
 
+// Route for plagiarism check
+assignmentRouter.get('/assignments/:assignmentId/plagiarism-report', assignmentController.getPlagiarismReport)
+
 export default assignmentRouter;
