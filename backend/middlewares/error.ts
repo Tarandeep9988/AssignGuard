@@ -1,26 +1,27 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/AppError";
+import { sendResponse } from "../utils/Response";
 
 export async function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof AppError) {
-      return res.status(err.statusCode).json({
+      return sendResponse(res, {
         success: false,
         message: err.message,
-        data: null,
-      })
+        data: {},
+      }, err.statusCode);
     }
     else if (err instanceof Error) {
-      return res.status(500).json({
+      return sendResponse(res, {
         success: false,
         message: err.message,
-        data: null,
-      });
+        data: {},
+      }, 500);
     }
     else {
-      return res.status(500).json({
+      return sendResponse(res, {
         success: false,
         message: "An unexpected error occurred",
-        data: null,
-      });
+        data: {},
+      }, 500);
     }
 }
