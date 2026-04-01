@@ -4,10 +4,10 @@ import { authenticate, authorizeTeacher } from '../middlewares/auth';
 
 const assignmentRouter = express.Router();
 
-assignmentRouter.get('/assignments', authenticate, assignmentController.getAllAssignments);
+assignmentRouter.get('/assignments', authenticate, assignmentController.getAllUserAssignments);
 assignmentRouter.get('/assignments/:assignmentId', authenticate, assignmentController.getAssignmentById);
 assignmentRouter.post('/assignments', authenticate, authorizeTeacher, assignmentController.createAssignment);
-// assignmentRouter.put('/assignments/:assignmentId', authenticate, authorizeTeacher, assignmentController.updateAssignment);
+assignmentRouter.put('/assignments/:assignmentId', authenticate, authorizeTeacher, assignmentController.updateAssignment);
 // assignmentRouter.delete('/assignments/:assignmentId', authenticate, authorizeTeacher, assignmentController.deleteAssignment);
 
 

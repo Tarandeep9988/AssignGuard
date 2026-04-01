@@ -3,20 +3,18 @@ import * as z from "zod";
 import { AppError } from "../utils/AppError";
 import submissionServices from "../services/submission";
 
-const createSubmissionSchema = z.object({
-  content: z.string().min(1),
-  assignmentId: z.string().min(1),
-})
-
 async function createSubmission(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = res.locals.userId;
 
-    const response = createSubmissionSchema.safeParse({ ...req.body, ...req.params });
+    const response = z.object({
+      content: z.string().min(1),
+      assignmentId: z.string().min(1),
+    }).safeParse({ ...req.body, ...req.params });
     if (!response.success) {
       throw new AppError({
         statusCode: 400,
-        message: "Invalid request body",
+        message: "Invalid request data",
       });
     }
 
@@ -37,19 +35,15 @@ async function createSubmission(req: Request, res: Response, next: NextFunction)
     next(error);
   }
 }
-
-
-
-const getSubmissionsByUserSchema = z.object({
-
-})
 async function getSubmissionsByUser(req: Request, res: Response, next: NextFunction) {
   try {
-    const response = getSubmissionsByUserSchema.safeParse({ ...req.body, ...req.params });
+    const response = z.object({
+
+    }).safeParse({ ...req.body, ...req.params });
     if (!response.success) {
       throw new AppError({
         statusCode: 400,
-        message: "Invalid request body",
+        message: "Invalid request data",
       });
     }
 
@@ -67,17 +61,15 @@ async function getSubmissionsByUser(req: Request, res: Response, next: NextFunct
   }
 }
 
-const getSubmissionsByAssignmentSchema = z.object({
-  assignmentId: z.string().min(1),
-})
-
 async function getSubmissionsByAssignment(req: Request, res: Response, next: NextFunction) {
   try {
-    const response = getSubmissionsByAssignmentSchema.safeParse({ ...req.body, ...req.params });
+    const response = z.object({
+      assignmentId: z.string().min(1),
+    }).safeParse({ ...req.body, ...req.params });
     if (!response.success) {
       throw new AppError({
         statusCode: 400,
-        message: "Invalid request parameters or body",
+        message: "Invalid request data",
       });
     }
 
@@ -94,18 +86,15 @@ async function getSubmissionsByAssignment(req: Request, res: Response, next: Nex
     
   }
 }
-
-
-const getSubmissionByIdSchema = z.object({
-  id: z.string().min(1),
-})
 async function getSubmissionById(req: Request, res: Response, next: NextFunction) {
   try {
-    const response = getSubmissionByIdSchema.safeParse({ ...req.body, ...req.params });
+    const response = z.object({
+      id: z.string().min(1),
+    }).safeParse({ ...req.body, ...req.params });
     if (!response.success) {
       throw new AppError({
         statusCode: 400,
-        message: "Invalid request parameters",
+        message: "Invalid request data",
       });
     }
 
@@ -122,19 +111,16 @@ async function getSubmissionById(req: Request, res: Response, next: NextFunction
     next(error);
   }
 } 
-
-
-const updateSubmissionSchema = z.object({
-  submissionId: z.string().min(1),
-  content: z.string().min(1),
-})
 async function updateSubmission(req: Request, res: Response, next: NextFunction) {
   try {
-    const response = updateSubmissionSchema.safeParse({ ...req.params, ...req.body });
+    const response = z.object({
+      submissionId: z.string().min(1),
+      content: z.string().min(1),
+    }).safeParse({ ...req.params, ...req.body });
     if (!response.success) {
       throw new AppError({
         statusCode: 400,
-        message: "Invalid request parameters or body",
+        message: "Invalid request data",
       });
     }
 
@@ -153,18 +139,15 @@ async function updateSubmission(req: Request, res: Response, next: NextFunction)
     next(error);
   }
 }
-
-
-const deleteSubmissionSchema = z.object({
-  submissionId: z.string().min(1),
-})
 async function deleteSubmission(req: Request, res: Response, next: NextFunction) {
   try {
-    const response = deleteSubmissionSchema.safeParse({ ...req.params, ...req.body });
+    const response = z.object({
+      submissionId: z.string().min(1),
+    }).safeParse({ ...req.params, ...req.body });
     if (!response.success) {
       throw new AppError({
         statusCode: 400,
-        message: "Invalid request parameters or body",
+        message: "Invalid request data",
       });
     }
 

@@ -11,8 +11,14 @@ async function createAssignment({
   title: string;
   description: string;
   dueDate: Date;
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId | string;
 }) {
+  if (dueDate < new Date()) {
+    throw new AppError({
+      message: "Due date cannot be in the past",
+      statusCode: 400,
+    });
+  }
   const assignment = await Assignment.create({
     title,
     description,
@@ -22,35 +28,42 @@ async function createAssignment({
   return assignment;
 }
 
-interface GetAssignmentParams {
-  id: mongoose.Types.ObjectId;
+async function getAssignmentById({
+  assignmentId,
+  userId,
+}: {
+  assignmentId: string;
+  userId: mongoose.Types.ObjectId | string;
+}) {
+  const assignment = await Assignment.findOne({ _id: assignmentId, userId });
+  return assignment;
 }
 
-
-async function getAssignmentById({ assignmentId, userId }: { assignmentId: string, userId: mongoose.Types.ObjectId }) {
-  try {
-    const assignment = await Assignment.findOne({ _id: assignmentId, userId });
-    return assignment;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    throw new AppError({
-      message: "Error fetching assignment: " + errorMessage,
-      statusCode: 500,
-    });
-  }
-}
-
-async function updateAssignment({ assignmentId, userId, title, description, dueDate }: {
-  assignmentId: string,
-  userId: mongoose.Types.ObjectId,
-  title?: string,
-  description?: string,
-  dueDate?: string,
+async function updateAssignment({
+  assignmentId,
+  userId,
+  title,
+  description,
+  dueDate,
+}: {
+  assignmentId: mongoose.Types.ObjectId | string;
+  userId: mongoose.Types.ObjectId | string;
+  title?: string;
+  description?: string;
+  dueDate?: Date;
 }) {
   const update: any = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
   if (dueDate !== undefined) update.dueDate = new Date(dueDate);
+
+  if (update.dueDate && update.dueDate < new Date()) {
+    throw new AppError({
+      message: "Due date cannot be in the past",
+      statusCode: 400,
+    });
+  }
+
   const assignment = await Assignment.findOneAndUpdate(
     { _id: assignmentId, userId },
     { $set: update },
@@ -59,33 +72,45 @@ async function updateAssignment({ assignmentId, userId, title, description, dueD
   return assignment;
 }
 
-
 async function getAssignmentsByUserId({
   userId,
 }: {
-  userId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId | string;
 }) {
   const assignments = await Assignment.find({ userId });
   return assignments;
 }
 
-
-async function deleteAssignment({ id }: {
-  id: mongoose.Types.ObjectId | string;
+async function deleteAssignment({
+  assignmentId,
+  userId,
+}: {
+  assignmentId: mongoose.Types.ObjectId | string;
+  userId: mongoose.Types.ObjectId | string;
 }) {
-  try {
-    const assignment = await Assignment.findByIdAndDelete(id);
-    return assignment;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    throw new AppError({
-      message: "Error deleting assignment: " + errorMessage,
-      statusCode: 500,
-    });
-  }
+  const assignment = await Assignment.findOneAndDelete({
+    _id: assignmentId,
+    userId,
+  });
+  return assignment;
 }
 
+async function getPlagiarismReport({
+  userId,
+  assignmentId,
+}: {
+  userId: mongoose.Types.ObjectId | string;
+  assignmentId: mongoose.Types.ObjectId | string;
+}) {
+  // Placeholder implementation for plagiarism report generation
+  // In a real implementation, this would involve complex logic to compare the assignment with other submissions
+  // and generate a report based on the findings.
+
+  throw new AppError({
+    statusCode: 501,
+    message: "Plagiarism report generation is not implemented yet",
+  });
+}
 
 const assignmentServices = {
   createAssignment,
@@ -93,6 +118,7 @@ const assignmentServices = {
   getAssignmentsByUserId,
   updateAssignment,
   deleteAssignment,
-}
+  getPlagiarismReport,
+};
 
 export default assignmentServices;

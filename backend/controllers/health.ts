@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
+import { sendResponse } from "../utils/Response";
 
 export function healthCheckHandler(req : Request, res : Response) {
-  res.status(200).json({
+  return sendResponse(res, {
     success: true,
     message: "Server is healthy",
-    data: null,
-  });
+    data: {},
+  }, 200);
 }

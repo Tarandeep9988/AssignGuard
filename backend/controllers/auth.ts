@@ -1,20 +1,27 @@
-import { NextFunction, Request, Response } from "express";
-import zod from "zod";
+import { CookieOptions, NextFunction, Request, Response } from "express";
+import * as z from "zod";
 import { AppError } from "../utils/AppError";
 import userServices from "../services/user";
 import { signToken } from "../lib/jwt";
+import { sendResponse } from "../utils/Response";
 
-const loginSchema = zod.object({
-  email: zod.email(),
-  password: zod.string().min(6)
-});
+const setCookieOptions : CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 3600000, // 1 hour
+};
 
 export async function loginHandler(req : Request, res : Response, next : NextFunction) {
   try {
-    const response = loginSchema.safeParse(req.body);
+    const response = z.object({
+      email: z.email(),
+      password: z.string().min(6)
+    }).safeParse(req.body);
+    
     if (!response.success) {
       throw new AppError({
-        message: "Invalid request body",
+        message: "Invalid request data",
         statusCode: 400,
       });
     }
@@ -32,50 +39,52 @@ export async function loginHandler(req : Request, res : Response, next : NextFun
     const token = signToken({ userId: user._id});
 
     // setting cookie with token
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000, // 1 hour
-    });
+    res.cookie('token', token, setCookieOptions);
 
-    return res.status(200).json({
+    return sendResponse(res, {
       success: true,
       message: "Login successful",
       data: {
         user
       },
-    });
+    }, 200);
   } catch (error) {
     next(error);
   }
 }
 
-const registerSchema = zod.object({
-  name: zod.string().min(1),
-  email: zod.email(),
-  password: zod.string().min(6),
-  role: zod.enum(["student", "teacher"]),
-});
-
 export async function registerHandler(req : Request, res : Response, next : NextFunction) {
   try {
-    const response = registerSchema.safeParse(req.body);
+    const response = z.object({
+      name: z.string().min(1),
+      email: z.email(),
+      password: z.string().min(6),
+      role: z.enum(["student", "teacher"]),
+    }).safeParse(req.body);
+
     if (!response.success) {
       throw new AppError({
-        message: "Invalid request body",
+        message: "Invalid request data",
         statusCode: 400,
       });
     }
+
     const { name, email, password, role } = response.data;
     const user = await userServices.createUser({ name, email, password, role });
-    return res.status(200).json({
+
+    // User is registered, generate JWT token
+    const token = signToken({ userId: user._id});
+    // setting cookie with token
+    res.cookie('token', token, setCookieOptions);
+
+    return sendResponse(res, {
       success: true,
       message: "User registered successfully",
       data: {
         user
-      }
-    })
+      },
+    }, 200);
+    
   } catch (error) {
     next(error);
   }
