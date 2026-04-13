@@ -12,7 +12,7 @@ const setCookieOptions : CookieOptions = {
   maxAge: 3600000, // 1 hour
 };
 
-export async function loginHandler(req : Request, res : Response, next : NextFunction) {
+async function loginHandler(req : Request, res : Response, next : NextFunction) {
   try {
     const response = z.object({
       email: z.email(),
@@ -53,7 +53,7 @@ export async function loginHandler(req : Request, res : Response, next : NextFun
   }
 }
 
-export async function registerHandler(req : Request, res : Response, next : NextFunction) {
+async function registerHandler(req : Request, res : Response, next : NextFunction) {
   try {
     const response = z.object({
       name: z.string().min(1),
@@ -89,3 +89,37 @@ export async function registerHandler(req : Request, res : Response, next : Next
     next(error);
   }
 }
+
+async function logoutHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    res.clearCookie('token', setCookieOptions);
+    return sendResponse(res, {
+      success: true,
+      message: "Logout successful",
+      data: { },
+    }, 200);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function verifyHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    return sendResponse(res, {
+      success: true,
+      message: "Authentication successful",
+      data: { },
+    }, 200);
+  } catch (error) {
+    next(error);
+  }
+} 
+
+const authController = {
+  loginHandler,
+  registerHandler,
+  logoutHandler,
+  verifyHandler
+};
+
+export default authController;  

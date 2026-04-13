@@ -1,9 +1,10 @@
 import express, { type Router } from 'express';
-import { loginHandler, registerHandler } from "../controllers/auth.js";
+import authController from "../controllers/auth.js";
 const authRouter: Router = express.Router();
 
-authRouter.post("/login", loginHandler);
-authRouter.post("/register", registerHandler);
-
+authRouter.post("/login", authController.loginHandler);
+authRouter.post("/register", authController.registerHandler);
+authRouter.post("/logout", authController.logoutHandler);
+authRouter.get("/verify", authController.verifyHandler);
 
 export default authRouter;
