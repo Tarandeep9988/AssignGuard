@@ -4,56 +4,73 @@ import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from '@/lib/auth-context';
 import { ThemeContext, Theme } from '@/lib/theme-context';
 import { User, UserRole, AuthContextType } from '@/lib/types';
-import { MOCK_USERS } from '@/lib/mock-data';
+import { apiClient } from '@/lib/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Set default user to first teacher for demo purposes
-  const [user, setUserState] = useState<User | null>(MOCK_USERS[1]); // Sarah (teacher)
+  const [user, setUserState] = useState<User | null>(null);
   const [theme, setThemeState] = useState<Theme>('light');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load user and theme from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('assignguard-user');
-    if (storedUser) {
+    const initializeAuth = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUserState(parsedUser);
+        // Try to verify if user is already logged in
+        const response = await apiClient.verify();
+        if (response.success && response.data.user) {
+          setUserState(response.data.user);
+          localStorage.setItem('assignguard-user', JSON.stringify(response.data.user));
+        }
       } catch (error) {
-        console.error('Failed to parse stored user:', error);
+        // User is not authenticated
         localStorage.removeItem('assignguard-user');
       }
-    }
 
-    // Load theme from localStorage
-    const storedTheme = localStorage.getItem('assignguard-theme') as Theme | null;
-    if (storedTheme) {
-      setThemeState(storedTheme);
-      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
-    } else {
-      // Check system preference
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        setThemeState('dark');
-        document.documentElement.classList.add('dark');
+      // Load theme from localStorage
+      const storedTheme = localStorage.getItem('assignguard-theme') as Theme | null;
+      if (storedTheme) {
+        setThemeState(storedTheme);
+        document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+      } else {
+        // Check system preference
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          setThemeState('dark');
+          document.documentElement.classList.add('dark');
+        }
       }
-    }
+
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string, role: UserRole) => {
-    // Find user by email and role from mock data
-    const foundUser = MOCK_USERS.find(u => u.email === email && u.role === role);
-    
-    if (!foundUser) {
-      throw new Error('Invalid email or role');
+    try {
+      const response = await apiClient.login(email, password);
+      if (response.success && response.data.user) {
+        const user = response.data.user;
+        // Add role if not in response
+        const userWithRole = { ...user, role };
+        setUserState(userWithRole);
+        localStorage.setItem('assignguard-user', JSON.stringify(userWithRole));
+      } else {
+        throw new Error(response.message || 'Login failed');
+      }
+    } catch (error) {
+      throw error;
     }
-
-    setUserState(foundUser);
-    localStorage.setItem('assignguard-user', JSON.stringify(foundUser));
   };
 
-  const logout = () => {
-    setUserState(null);
-    localStorage.removeItem('assignguard-user');
+  const logout = async () => {
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUserState(null);
+      localStorage.removeItem('assignguard-user');
+    }
   };
 
   const setUser = (newUser: User | null) => {

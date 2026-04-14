@@ -1,27 +1,72 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { getSubmissionsByStudentId, MOCK_SUBMISSIONS, getAssignmentById } from '@/lib/mock-data';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Submission } from '@/lib/types';
 import { SubmissionTable } from '@/components/submissions/SubmissionTable';
-import { ArrowRight } from 'lucide-react';
+import { apiClient } from '@/lib/api';
 import Link from 'next/link';
 
 export default function SubmissionsPage() {
   const { user } = useAuth();
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
-  const submissions =
-    user?.role === 'student'
-      ? getSubmissionsByStudentId(user.id)
-      : MOCK_SUBMISSIONS;
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        let response;
+        if (user?.role === 'teacher') {
+          // Teachers see all submissions - get from all assignments
+          const assignmentsRes = await apiClient.getAssignments();
+          if (!assignmentsRes.success) throw new Error('Failed to load assignments');
+          
+          const allSubmissions: Submission[] = [];
+          for (const assignment of assignmentsRes.data) {
+            const submissionsRes = await apiClient.getSubmissionsByAssignment(assignment.id);
+            if (submissionsRes.success) {
+              allSubmissions.push(...submissionsRes.data);
+            }
+          }
+          setSubmissions(allSubmissions);
+        } else {
+          // Students see only their submissions
+          response = await apiClient.getSubmissions();
+          if (response.success) {
+            setSubmissions(response.data);
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load submissions');
+        console.error('Error fetching submissions:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchSubmissions();
+    }
+  }, [user]);
 
   const highRiskCount = submissions.filter(s => s.similarity >= 50).length;
   const mediumRiskCount = submissions.filter(s => s.similarity >= 25 && s.similarity < 50).length;
   const lowRiskCount = submissions.filter(s => s.similarity < 25).length;
+
+  if (isLoading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Loading submissions...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -35,6 +80,12 @@ export default function SubmissionsPage() {
             : 'View your submitted work and similarity reports'}
         </p>
       </div>
+
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/50 text-destructive text-sm p-4 rounded mb-6">
+          {error}
+        </div>
+      )}
 
       {/* Risk Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -150,7 +201,7 @@ export default function SubmissionsPage() {
 
               <div className="flex gap-3">
                 <Link
-                  href={`/dashboard/assignments/${selectedSubmission.assignmentId}`}
+                  href={`/assignments/${selectedSubmission.assignmentId}`}
                   className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
                 >
                   View Assignment
@@ -172,7 +223,7 @@ export default function SubmissionsPage() {
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">No submissions yet</p>
           <Link
-            href="/dashboard/assignments"
+            href="/assignments"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
           >
             View Assignments

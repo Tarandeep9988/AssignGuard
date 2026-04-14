@@ -6,16 +6,28 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { getSubmissionsByStudentId } from '@/lib/mock-data';
 
-export function AssignmentCard({ assignment }: { assignment: Assignment }) {
+interface AssignmentCardProps {
+  assignment: Assignment;
+  studentSubmission?: {
+    id: string;
+    assignmentId: string;
+    studentId: string;
+    studentName: string;
+    content: string;
+    submittedAt: string;
+    similarity: number;
+    status: 'submitted' | 'graded' | 'plagiarized';
+  };
+}
+
+export function AssignmentCard({ assignment, studentSubmission }: AssignmentCardProps) {
   const { user } = useAuth();
-  const studentSubmissions = user ? getSubmissionsByStudentId(user.id) : [];
-  const studentSubmission = studentSubmissions.find(s => s.assignmentId === assignment.id);
-  const isPastDeadline = assignment.deadline < new Date();
+  const deadline = new Date(assignment.deadline);
+  const isPastDeadline = deadline < new Date();
 
   return (
-    <Link href={`/dashboard/assignments/${assignment.id}`}>
+    <Link href={`/assignments/${assignment.id}`}>
       <Card className="p-6 border-border hover:shadow-lg transition-all cursor-pointer h-full">
         <div className="space-y-4">
           {/* Header */}
@@ -53,7 +65,7 @@ export function AssignmentCard({ assignment }: { assignment: Assignment }) {
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="w-4 h-4" />
-              <span>Due: {assignment.deadline.toLocaleDateString()}</span>
+              <span>Due: {deadline.toLocaleDateString()}</span>
             </div>
             {user?.role === 'teacher' && (
               <div className="flex items-center gap-2 text-muted-foreground">
