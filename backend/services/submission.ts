@@ -61,7 +61,7 @@ async function getSubmissionsByAssignment({
   assignmentId,
 }: {
   assignmentId: mongoose.Types.ObjectId | string;
-}) {
+}) : Promise<any[]> {
   const submissions = await Submission.find({ assignmentId });
   return submissions;
 }

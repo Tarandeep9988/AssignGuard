@@ -169,47 +169,11 @@ async function deleteAssignment(req: Request, res: Response, next: NextFunction)
   }
 }
 
-// Controller to handle plagiarism report
-
-
-async function getPlagiarismReport(req: Request, res: Response, next: NextFunction) {
-  try {
-    const user = res.locals.user;
-    const response = z.object({
-      assignmentId: z.string().min(1),
-    }).safeParse({...req.params, ...req.body});
-
-    if (!response.success) {
-      throw new AppError({
-        statusCode: 400,
-        message: "Invalid request data",
-      });
-    }
-    const { assignmentId } = response.data;
-
-    const report = await assignmentServices.getPlagiarismReport({
-      userId: user._id,
-      assignmentId,
-    });
-
-    return sendResponse(res, {
-      success: true,
-      message: "Plagiarism report generated successfully",
-      data: {
-        report,
-      }
-    }, 200);
-
-  } catch (error) {
-    next(error);
-  }
-}
 
 const assignmentController = {
   createAssignment,
   getAllUserAssignments,
   getAssignmentById,
-  getPlagiarismReport,  
   updateAssignment,
   deleteAssignment,
 };

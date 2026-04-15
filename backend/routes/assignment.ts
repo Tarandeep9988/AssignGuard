@@ -1,6 +1,7 @@
 import express, { type Router } from 'express';
 import assignmentController from '../controllers/assignment.js';
 import { authenticate, authorizeTeacher } from '../middlewares/auth.js';
+import reportController from '../controllers/report.js';
 
 const assignmentRouter: Router = express.Router();
 
@@ -11,7 +12,8 @@ assignmentRouter.put('/assignments/:assignmentId', authenticate, authorizeTeache
 assignmentRouter.delete('/assignments/:assignmentId', authenticate, authorizeTeacher, assignmentController.deleteAssignment);
 
 
-// Route for plagiarism check
-assignmentRouter.get('/assignments/:assignmentId/plagiarism-report', assignmentController.getPlagiarismReport)
+// Route for reports
+assignmentRouter.get('/assignments/:assignmentId/report', authenticate, authorizeTeacher, reportController.getReport);
+assignmentRouter.post('/assignments/:assignmentId/report', authenticate, authorizeTeacher, reportController.generateReport);
 
 export default assignmentRouter;

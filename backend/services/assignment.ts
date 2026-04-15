@@ -98,30 +98,12 @@ async function deleteAssignment({
   return assignment;
 }
 
-async function getPlagiarismReport({
-  userId,
-  assignmentId,
-}: {
-  userId: mongoose.Types.ObjectId | string;
-  assignmentId: mongoose.Types.ObjectId | string;
-}) {
-  // Placeholder implementation for plagiarism report generation
-  // In a real implementation, this would involve complex logic to compare the assignment with other submissions
-  // and generate a report based on the findings.
-
-  throw new AppError({
-    statusCode: 501,
-    message: "Plagiarism report generation is not implemented yet",
-  });
-}
-
 const assignmentServices = {
   createAssignment,
   getAssignmentById,
   getAssignmentsByUserId,
   updateAssignment,
   deleteAssignment,
-  getPlagiarismReport,
 };
 
 export default assignmentServices;
