@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 import Link from 'next/link';
 import { Plus, Calendar, BookOpen } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import LandingPage from '@/components/landing/LandingPage';
 
 interface Assignment {
   id: string;
@@ -19,16 +19,9 @@ interface Assignment {
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
 
   useEffect(() => {
     if (user) {
@@ -47,11 +40,13 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading || (!user && fetching)) {
+  if (loading) {
     return <div className="flex-1 flex items-center justify-center">Loading...</div>;
   }
 
-  if (!user) return null;
+  if (!user) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="container mx-auto p-4 md:p-8 space-y-8">

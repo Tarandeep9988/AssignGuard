@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       localStorage.removeItem('user');
       // Redirect to login if on protected route
-      if (pathname !== '/login' && pathname !== '/register') {
+      if (pathname !== '/login' && pathname !== '/register' && pathname !== '/') {
         router.push('/login');
       }
     } finally {
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await api.post('/logout');
       setUser(null);
       localStorage.removeItem('user');
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error("Logout failed", error);
     }
