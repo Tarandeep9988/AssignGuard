@@ -21,7 +21,9 @@ async function getReport({
     });
   }
 
-  const report = await Report.findOne({ assignmentId });
+  const report = await Report.findOne({ assignmentId })
+    .populate('comparisons.student1ID', 'name')
+    .populate('comparisons.student2ID', 'name');
   return report;
 }
 
@@ -62,7 +64,9 @@ async function generateReport({
     assignmentId,
     comparisons,
   });
-  return report;
+  return await Report.findById(report._id)
+    .populate('comparisons.student1ID', 'name')
+    .populate('comparisons.student2ID', 'name');
 }
 
 const reportServices = {

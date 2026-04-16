@@ -31,12 +31,11 @@ async function createAssignment({
 
 async function getAssignmentById({
   assignmentId,
-  userId,
 }: {
   assignmentId: string;
-  userId: mongoose.Types.ObjectId | string;
+  userId?: mongoose.Types.ObjectId | string;
 }) {
-  const assignment = await Assignment.findOne({ _id: assignmentId, userId });
+  const assignment = await Assignment.findById(assignmentId);
   return assignment;
 }
 
@@ -82,6 +81,10 @@ async function getAssignmentsByUserId({
   return assignments;
 }
 
+async function getAllAssignments() {
+  return await Assignment.find({});
+}
+
 async function deleteAssignment({
   assignmentId,
   userId,
@@ -102,6 +105,7 @@ const assignmentServices = {
   createAssignment,
   getAssignmentById,
   getAssignmentsByUserId,
+  getAllAssignments,
   updateAssignment,
   deleteAssignment,
 };

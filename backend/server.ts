@@ -41,8 +41,9 @@ app.use("/api/v1", assignmentRouter);
 // Error handling
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT) || 4000;
+const hostname = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, hostname, () => {
+  console.log(`Server is running on port http://${hostname}:${PORT}`);
 });

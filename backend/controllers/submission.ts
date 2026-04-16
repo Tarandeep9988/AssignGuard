@@ -5,7 +5,7 @@ import submissionServices from "../services/submission.js";
 
 async function createSubmission(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = res.locals.userId;
+    const userId = res.locals.user._id;
 
     const response = z.object({
       content: z.string().min(1),
@@ -47,7 +47,7 @@ async function getSubmissionsByUser(req: Request, res: Response, next: NextFunct
       });
     }
 
-    const userId = res.locals.userId;
+    const userId = res.locals.user._id;
     const submissions = await submissionServices.getSubmissionsByUser({ userId });
 
     res.status(200).json({

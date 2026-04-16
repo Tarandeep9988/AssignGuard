@@ -12,7 +12,7 @@ async function createAssignment(req: Request, res: Response, next: NextFunction)
     const response = z.object({
       title: z.string().min(1),
       description: z.string().min(1),
-      dueDate: z.date(),
+      dueDate: z.coerce.date(),
     }).safeParse({ ...req.body, ...req.params });
 
     if (!response.success) {
@@ -48,9 +48,14 @@ async function createAssignment(req: Request, res: Response, next: NextFunction)
 async function getAllUserAssignments(req: Request, res: Response, next: NextFunction) {
   try {
     const user = res.locals.user;
-    const assignments = await assignmentServices.getAssignmentsByUserId({
-      userId: user._id,
-    });
+    let assignments;
+    if (user.role === 'teacher') {
+      assignments = await assignmentServices.getAssignmentsByUserId({
+        userId: user._id,
+      });
+    } else {
+      assignments = await assignmentServices.getAllAssignments();
+    }
     return sendResponse(res, {
       success: true,
       message: "Assignments retrieved successfully",
@@ -108,7 +113,7 @@ async function updateAssignment(req: Request, res: Response, next: NextFunction)
       assignmentId: z.string().min(1),
       title: z.string().min(1).optional(),
       description: z.string().min(1).optional(),
-      dueDate: z.date().optional(),
+      dueDate: z.coerce.date().optional(),
     }).safeParse({ ...req.params, ...req.body });
 
     if (!response.success) {
@@ -119,18 +124,27 @@ async function updateAssignment(req: Request, res: Response, next: NextFunction)
     }
     const { assignmentId, title, description, dueDate } = response.data;
 
-    // const assignment = await assignmentServices.updateAssignment({
-    //   assignmentId,
-    //   userId: user._id,
-    //   title,
-    //   description,
-    //   dueDate: dueDate ? new Date(dueDate) : undefined,
-    // });
+    const updateData: any = {
+      assignmentId,
+      userId: user._id,
+    };
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (dueDate !== undefined) updateData.dueDate = new Date(dueDate);
+
+    const assignment = await assignmentServices.updateAssignment(updateData);
+
+    if (!assignment) {
+      throw new AppError({
+        statusCode: 404,
+        message: "Assignment not found or unauthorized",
+      });
+    }
 
     return sendResponse(res, {
       success: true,
-      message: "Not implemented yet",
-      data: { },
+      message: "Assignment updated successfully",
+      data: { assignment },
     }, 200);  
 
   } catch (error) {

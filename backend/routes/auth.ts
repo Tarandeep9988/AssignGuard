@@ -4,11 +4,12 @@ import { authenticate } from '../middlewares/auth.js';
 
 const authRouter: Router = express.Router();
 
+// Public routes
 authRouter.post("/login", authController.loginHandler);
 authRouter.post("/register", authController.registerHandler);
+authRouter.post("/logout", authController.logoutHandler);
 
 // Protected routes
-authRouter.post("/logout", authenticate, authController.logoutHandler);
 authRouter.get("/verify", authenticate, authController.verifyHandler);
 
 export default authRouter;
