@@ -1,0 +1,13 @@
+node_modules
+.next
+.env
+.env.local
+.git
+.gitignore
+Dockerfile
+README.md
+LICENSE
+.dockerignore
+.vscode
+.idea
+*.log

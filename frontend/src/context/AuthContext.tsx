@@ -30,13 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = async () => {
     try {
       setLoading(true);
-      // Backend /verify just returns 200 if token is valid. It doesn't return user info.
-      // But we can check if it succeeds. We might need user info, wait, does verify return user?
-      // Looking at auth.ts, verifyHandler returns { success: true, message: "Authentication successful", data: {} }
-      // We will need to store user info in localStorage or rely on another endpoint.
-      // For now, let's just do verify. If it works, and we have user in state, great.
-      // If we don't have user in state on reload, we might need to fetch profile. Wait, backend doesn't have /me endpoint?
-      // Let me assume we persist user in localStorage on login.
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         await api.get('/verify'); // verify token is still valid

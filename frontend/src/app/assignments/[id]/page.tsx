@@ -83,30 +83,32 @@ export default function AssignmentDetailPage() {
 
   const handleGetPlagiarismReport = async () => {
     try {
-      const res = await api.get(`/assignments/${id}/plagiarism-report`);
-      setPlagiarismReport(res.data.data.report);
+      let reportData;
+      try {
+        const res = await api.get(`/assignments/${id}/report`);
+        reportData = res.data.data.report;
+      } catch (err: any) {
+        if (err.response?.status === 404 || !err.response) {
+          const res = await api.post(`/assignments/${id}/report`);
+          reportData = res.data.data.report;
+        } else {
+          throw err;
+        }
+      }
+
+      if (reportData) {
+        const formattedComparisons = reportData.comparisons.map((comp: any) => ({
+          studentA: comp.student1ID?.name || comp.student1ID || 'Unknown',
+          studentAId: comp.student1ID?._id || comp.student1ID,
+          studentB: comp.student2ID?.name || comp.student2ID || 'Unknown',
+          studentBId: comp.student2ID?._id || comp.student2ID,
+          similarityPercentage: Math.round(comp.similarityScore),
+          isFlagged: comp.similarityScore > 50
+        }));
+        setPlagiarismReport({ comparisons: formattedComparisons });
+      }
     } catch (err: any) {
-      // Temporary mock data for UI testing since backend returns 501 Not Implemented
-      setPlagiarismReport({
-        comparisons: [
-          {
-            studentA: "Student Alice",
-            studentAId: submissions[0]?.userId || "user1",
-            studentB: "Prof Feynman", 
-            studentBId: submissions[1]?.userId || "user2",
-            similarityPercentage: 85.5,
-            isFlagged: true
-          },
-          {
-            studentA: "Student Charlie",
-            studentAId: "user3",
-            studentB: "Student Alice",
-            studentBId: submissions[0]?.userId || "user1",
-            similarityPercentage: 12.0,
-            isFlagged: false
-          }
-        ]
-      });
+      alert("Failed to generate report: " + (err.response?.data?.message || err.message));
     }
   };
 
