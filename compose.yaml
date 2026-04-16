@@ -1,26 +1,24 @@
 services:
   frontend:
-    image: assignguard-frontend
+    image: assign-guard-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    env_file:
-      - ./frontend/.env.production
     environment:
-      NODE_ENV: production
+      BACKEND_API_URL: http://backend:4000/api/v1
+    env_file:
+      - ./frontend/.env
     ports:
       - "3000:3000"
     depends_on:
       - backend
 
   backend:
-    image: assignguard-backend
+    image: assign-guard-backend
     build:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
       - ./backend/.env
-    environment:
-      NODE_ENV: production
     ports:
       - "4000:4000"
