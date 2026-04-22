@@ -47,6 +47,18 @@ export default function AssignmentDetailPage() {
     }
   }, [user, id]);
 
+  const formatReport = (reportData: any) => {
+    const formattedComparisons = reportData.comparisons.map((comp: any) => ({
+      studentA: comp.student1ID?.name || comp.student1ID || 'Unknown',
+      studentAId: comp.student1ID?._id || comp.student1ID,
+      studentB: comp.student2ID?.name || comp.student2ID || 'Unknown',
+      studentBId: comp.student2ID?._id || comp.student2ID,
+      similarityPercentage: Math.round(comp.similarityScore),
+      isFlagged: comp.similarityScore > 50
+    }));
+    return { comparisons: formattedComparisons };
+  };
+
   const fetchData = async () => {
     try {
       const assignmentRes = await api.get(`/assignments/${id}`);
@@ -55,6 +67,17 @@ export default function AssignmentDetailPage() {
       if (user?.role === 'teacher') {
         const subsRes = await api.get(`/assignments/${id}/submissions`);
         setSubmissions(subsRes.data.data.submissions);
+
+        // Fetch existing plagiarism report automatically
+        try {
+          const reportRes = await api.get(`/assignments/${id}/report`);
+          const reportData = reportRes.data.data.report;
+          if (reportData) {
+            setPlagiarismReport(formatReport(reportData));
+          }
+        } catch (err) {
+          console.log("No existing plagiarism report found on initial load.");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -83,29 +106,15 @@ export default function AssignmentDetailPage() {
 
   const handleGetPlagiarismReport = async () => {
     try {
-      let reportData;
-      try {
-        const res = await api.get(`/assignments/${id}/report`);
-        reportData = res.data.data.report;
-      } catch (err: any) {
-        if (err.response?.status === 404 || !err.response) {
-          const res = await api.post(`/assignments/${id}/report`);
-          reportData = res.data.data.report;
-        } else {
-          throw err;
-        }
-      }
+      // Step 1: POST to generate the report
+      await api.post(`/assignments/${id}/report`);
+
+      // Step 2: GET to retrieve the newly generated report
+      const res = await api.get(`/assignments/${id}/report`);
+      const reportData = res.data.data.report;
 
       if (reportData) {
-        const formattedComparisons = reportData.comparisons.map((comp: any) => ({
-          studentA: comp.student1ID?.name || comp.student1ID || 'Unknown',
-          studentAId: comp.student1ID?._id || comp.student1ID,
-          studentB: comp.student2ID?.name || comp.student2ID || 'Unknown',
-          studentBId: comp.student2ID?._id || comp.student2ID,
-          similarityPercentage: Math.round(comp.similarityScore),
-          isFlagged: comp.similarityScore > 50
-        }));
-        setPlagiarismReport({ comparisons: formattedComparisons });
+        setPlagiarismReport(formatReport(reportData));
       }
     } catch (err: any) {
       alert("Failed to generate report: " + (err.response?.data?.message || err.message));
@@ -119,16 +128,16 @@ export default function AssignmentDetailPage() {
     <div className="container mx-auto p-4 md:p-8 space-y-8">
       <Card className="border-primary/20 shadow-lg shadow-primary/5">
         <CardHeader className="border-b border-border bg-muted/20">
-          <div className="flex justify-between items-start gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="text-3xl font-bold">{assignment.title}</CardTitle>
+              <CardTitle className="text-2xl md:text-3xl font-bold">{assignment.title}</CardTitle>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 bg-background/50 inline-flex px-3 py-1.5 rounded-full border border-border">
                 <Calendar className="w-4 h-4" />
                 Due: {new Date(assignment.dueDate).toLocaleString()}
               </div>
             </div>
             {user?.role === 'teacher' && (
-              <Button variant="outline" className="gap-2" onClick={handleGetPlagiarismReport}>
+              <Button variant="outline" className="gap-2 w-full md:w-auto justify-center cursor-pointer" onClick={handleGetPlagiarismReport}>
                 <ShieldAlert className="w-4 h-4" />
                 Generate Plagiarism Report
               </Button>
@@ -185,12 +194,12 @@ export default function AssignmentDetailPage() {
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
                   {plagiarismReport.comparisons?.map((comp: any, idx: number) => (
-                    <div key={idx} className={`p-4 flex items-center justify-between ${comp.isFlagged ? 'bg-destructive/5' : ''}`}>
+                    <div key={idx} className={`p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${comp.isFlagged ? 'bg-destructive/5' : ''}`}>
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 font-medium">
-                          <span>{comp.studentA}</span>
-                          <span className="text-muted-foreground text-xs mx-2">compared with</span>
-                          <span>{comp.studentB}</span>
+                        <div className="flex flex-wrap items-center gap-1.5 font-medium text-sm sm:text-base">
+                          <span className="text-foreground">{comp.studentA}</span>
+                          <span className="text-muted-foreground text-xs font-normal">compared with</span>
+                          <span className="text-foreground">{comp.studentB}</span>
                         </div>
                         {comp.isFlagged && (
                           <div className="text-xs font-semibold text-destructive uppercase tracking-wider">
@@ -198,7 +207,7 @@ export default function AssignmentDetailPage() {
                           </div>
                         )}
                       </div>
-                      <div className={`text-xl font-bold px-3 py-1 rounded-md ${comp.isFlagged ? 'bg-destructive text-destructive-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+                      <div className={`text-lg sm:text-xl font-bold px-3 py-1 rounded-md self-start sm:self-auto ${comp.isFlagged ? 'bg-destructive text-destructive-foreground' : 'bg-secondary text-secondary-foreground'}`}>
                         {comp.similarityPercentage}%
                       </div>
                     </div>

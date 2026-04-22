@@ -19,24 +19,24 @@ export default function LandingPage() {
           <span>The standard in academic integrity</span>
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl mb-6">
-          Secure, Plagiarism-Free <br />
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl mb-6 px-2">
+          Secure, Plagiarism-Free <br className="hidden sm:inline" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Assignment Management</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed px-4">
           AssignGuard empowers educators to enforce academic integrity effortlessly, while providing students with a seamless and transparent submission experience.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <Link href="/register">
-            <Button size="lg" className="h-14 px-8 text-lg gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto px-4 sm:px-0">
+          <Link href="/register" className="w-full sm:w-auto">
+            <Button size="lg" className="h-14 w-full px-8 text-lg gap-2 cursor-pointer">
               Get Started for Free
               <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
-          <Link href="/login">
-            <Button size="lg" variant="outline" className="h-14 px-8 text-lg bg-background/50 backdrop-blur-sm">
+          <Link href="/login" className="w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="h-14 w-full px-8 text-lg bg-background/50 backdrop-blur-sm cursor-pointer">
               Sign In to Dashboard
             </Button>
           </Link>

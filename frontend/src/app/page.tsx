@@ -50,7 +50,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Assignments</h1>
           <p className="text-muted-foreground mt-1">
@@ -58,8 +58,8 @@ export default function DashboardPage() {
           </p>
         </div>
         {user.role === 'teacher' && (
-          <Link href="/assignments/create">
-            <Button className="gap-2 shadow-lg shadow-primary/20">
+          <Link href="/assignments/create" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto gap-2 shadow-lg shadow-primary/20 cursor-pointer">
               <Plus className="w-4 h-4" />
               Create Assignment
             </Button>

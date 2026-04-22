@@ -80,7 +80,7 @@ export default function RegisterPage() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none">I am a</label>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <label className="flex items-center gap-2 cursor-pointer p-3 border border-border rounded-md flex-1 hover:bg-card/80 transition-colors">
                   <input
                     type="radio"
@@ -88,7 +88,7 @@ export default function RegisterPage() {
                     value="student"
                     checked={role === 'student'}
                     onChange={() => setRole('student')}
-                    className="accent-primary"
+                    className="accent-primary cursor-pointer"
                   />
                   <span className="text-sm font-medium">Student</span>
                 </label>
@@ -99,7 +99,7 @@ export default function RegisterPage() {
                     value="teacher"
                     checked={role === 'teacher'}
                     onChange={() => setRole('teacher')}
-                    className="accent-primary"
+                    className="accent-primary cursor-pointer"
                   />
                   <span className="text-sm font-medium">Teacher</span>
                 </label>
