@@ -25,16 +25,6 @@ async function handleProxy(req: NextRequest) {
       }
     });
 
-    // Explicitly forward cookie and authorization headers since Headers.forEach can sometimes omit them
-    const cookie = req.headers.get('cookie');
-    if (cookie) {
-      headers.set('cookie', cookie);
-    }
-    const authorization = req.headers.get('authorization');
-    if (authorization) {
-      headers.set('authorization', authorization);
-    }
-
     const fetchOptions: RequestInit = {
       method: req.method,
       headers,

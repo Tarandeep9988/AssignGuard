@@ -8,7 +8,7 @@ import { sendResponse } from "../utils/Response.js";
 const setCookieOptions : CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  sameSite: 'lax', // 'strict' blocks cookies on redirects; 'lax' works with our BFF proxy
   maxAge: 3600000, // 1 hour
 };
 
