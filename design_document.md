@@ -3,9 +3,9 @@
 | Field           | Value                                    |
 |-----------------|------------------------------------------|
 | **Project**     | AssignGuard                              |
-| **Version**     | 1.0                                      |
-| **Date**        | 2026-05-16                               |
-| **Status**      | Implemented                              |
+| **Version**     | 1.1                                      |
+| **Date**        | 2026-05-23                               |
+| **Status**      | Deployed (Render)                        |
 | **Repository**  | `Tarandeep9988/plagiarism-guard`         |
 
 ---
@@ -113,10 +113,11 @@ The frontend implements a **catch-all API route** at `src/app/api/[...path]/rout
 
 - **Cookie passthrough** — HTTP-only auth cookies set by the backend are transparently forwarded, avoiding CORS cookie complexity.
 - **Backend opacity** — The browser never communicates directly with the backend; the backend URL is only known server-side.
-- **Header forwarding** — All request headers (except `Host`) are passed through; all response headers (except `Content-Encoding`) are returned.
+- **Safe header forwarding** — Connection-level headers (`host`, `connection`, `content-length`, `transfer-encoding`, `accept-encoding`, `content-encoding`) are stripped from requests. The `cookie` header is explicitly forwarded via `req.headers.get('cookie')` since Next.js App Router's `forEach` iterator omits it for security reasons.
+- **Response header sanitisation** — `Content-Encoding` and `Content-Length` are stripped from backend responses. The backend (behind Cloudflare on Render) returns brotli-compressed bodies; Node.js `fetch` decompresses them automatically, but the original compressed `Content-Length` would cause browsers to truncate the larger decompressed body.
 
 ```
-Browser → /api/assignments → Next.js BFF Proxy → http://backend:4000/api/v1/assignments
+Browser → /api/assignments → Next.js BFF Proxy → https://assignguard-backend.onrender.com/api/v1/assignments
 ```
 
 ---
@@ -308,7 +309,7 @@ sequenceDiagram
     DB-->>A: User document
     A->>A: bcrypt.compare(password, hash)
     A->>A: jwt.sign({userId}, secret, {expiresIn: 1h})
-    A-->>F: 200 + Set-Cookie: token=<JWT> (HttpOnly, Secure, SameSite=Strict)
+    A-->>F: 200 + Set-Cookie: token=<JWT> (HttpOnly, Secure, SameSite=Lax)
     F-->>B: 200 + Set-Cookie forwarded
     B->>B: Store user data in localStorage
 ```
@@ -321,7 +322,7 @@ sequenceDiagram
 | Payload | `{ userId: ObjectId }` |
 | Expiry | 1 hour |
 | Storage | HTTP-only cookie named `token` |
-| Cookie Flags | `httpOnly`, `secure` (production), `sameSite: strict`, `maxAge: 3600000` |
+| Cookie Flags | `httpOnly`, `secure` (production), `sameSite: lax`, `maxAge: 3600000` |
 
 ### 6.3 Middleware Stack
 
@@ -451,7 +452,9 @@ Custom UI components are in `src/components/ui/`:
 
 ## 9. Deployment
 
-### 9.1 Container Architecture
+AssignGuard supports two deployment modes: **local Docker Compose** and **Render cloud**.
+
+### 9.1 Local — Docker Compose Architecture
 
 ```mermaid
 graph TB
@@ -460,8 +463,8 @@ graph TB
         BE["backend<br/>:4000"]
     end
 
-    FE -->|BACKEND_API_URL| BE
-    BE -->|MONGODB_URI| DB[("MongoDB<br/>(external)")]
+    FE -->|BACKEND_API_URL = http://backend:4000/api/v1| BE
+    BE -->|MONGODB_URI| DB[("MongoDB Atlas")]
     BE -->|TEXT_SIMILARITY_API_URL| EXT["Similarity API"]
 ```
 
@@ -478,30 +481,53 @@ Both services use **multi-stage Docker builds**:
 
 | Stage | Base | Action |
 |-------|------|--------|
-| **Builder** | `node:lts-slim` | Install all deps → compile TypeScript |
+| **Builder** | `node:lts-slim` | Install all deps → compile TypeScript / Next.js |
 | **Runtime** | `node:lts-slim` | Install prod deps only → copy compiled output |
 
 - **Backend:** Compiles TypeScript to `dist/` via `tsc`, then runs `node dist/server.js`.
-- **Frontend:** Runs `next build` (outputs `standalone` mode), then starts with `next start`.
+- **Frontend:** Runs `next build` (standard output mode), then starts with `next start`.
 
-### 9.4 Environment Variables
+> **Note:** `output: 'standalone'` is **not** used. It is incompatible with `next start` and causes 404 errors on all API routes in production.
 
-#### Backend (`.env`)
+### 9.4 Cloud — Render Deployment
+
+The application is deployed as two separate **Render Web Services** connected to the same MongoDB Atlas cluster.
+
+```mermaid
+graph TB
+    User["Browser"] -->|HTTPS :443| CF["Cloudflare CDN"]
+    CF --> FE["Render: assignguard.onrender.com<br/>(Next.js Frontend)"]
+    CF --> BE["Render: assignguard-backend.onrender.com<br/>(Express Backend)"]
+    FE -->|BACKEND_API_URL server-side only| BE
+    BE --> DB[("MongoDB Atlas")]
+    BE --> SIM["Text Similarity API"]
+```
+
+| Service | Render URL | Runtime |
+|---------|------------|---------|
+| Frontend | `assignguard.onrender.com` | Node.js (Next.js) |
+| Backend | `assignguard-backend.onrender.com` | Node.js (Express) |
+
+> **Cloudflare note:** Render places all services behind Cloudflare. Cloudflare compresses responses with Brotli (`content-encoding: br`) and sets the compressed `content-length`. The BFF proxy decompresses responses automatically via Node.js `fetch`, so it must strip both `content-encoding` and `content-length` from forwarded response headers to prevent browsers from truncating the larger decompressed body.
+
+### 9.5 Environment Variables
+
+#### Backend
 
 | Variable | Required | Description |
 |----------|:---:|-------------|
 | `PORT` | ✗ | Server port (default: `4000`) |
-| `MONGODB_URI` | ✓ | MongoDB connection string |
+| `MONGODB_URI` | ✓ | MongoDB Atlas connection string |
 | `JWT_SECRET` | ✓ | Secret key for signing JWTs |
 | `TEXT_SIMILARITY_API_URL` | ✓ | URL for the plagiarism detection API |
 | `TEXT_SIMILARITY_API_KEY` | ✓ | API key for the similarity service |
-| `NODE_ENV` | ✗ | `production` for production mode |
+| `NODE_ENV` | ✗ | Set to `production` in cloud deployments |
 
-#### Frontend (`.env`)
+#### Frontend
 
 | Variable | Required | Description |
 |----------|:---:|-------------|
-| `BACKEND_API_URL` | ✓ | Internal URL to the backend API (e.g., `http://backend:4000/api/v1`) |
+| `BACKEND_API_URL` | ✓ | Backend API base URL — `http://backend:4000/api/v1` (Docker) or `https://assignguard-backend.onrender.com/api/v1` (Render) |
 
 ---
 
@@ -513,7 +539,7 @@ Both services use **multi-stage Docker builds**:
 |---------|---------------|
 | **Password hashing** | bcrypt with 10 salt rounds |
 | **JWT in HTTP-only cookie** | Prevents XSS-based token theft |
-| **SameSite=Strict cookie** | Mitigates CSRF |
+| **SameSite=Lax cookie** | Allows cookies on top-level navigations (required for BFF proxy redirect flows); mitigates CSRF on cross-site POST requests |
 | **Secure cookie flag** | Enabled in production (HTTPS only) |
 | **Helmet** | Sets security-related HTTP headers |
 | **Input validation** | Zod schemas at every controller entry point |
