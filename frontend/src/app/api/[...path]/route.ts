@@ -8,11 +8,19 @@ async function handleProxy(req: NextRequest) {
     const path = req.nextUrl.pathname.replace(/^\/api/, '');
     const url = `${BACKEND_API_URL}${path}${req.nextUrl.search}`;
 
-    // Forward the headers, especially the cookie
+    // Forward the headers, especially the cookie and content-type, excluding connection-level ones
     const headers = new Headers();
+    const excludedHeaders = [
+      'host',
+      'connection',
+      'content-length',
+      'transfer-encoding',
+      'content-encoding',
+      'accept-encoding',
+    ];
+
     req.headers.forEach((value, key) => {
-      // Do not forward host header to avoid resolving issues
-      if (key.toLowerCase() !== 'host') {
+      if (!excludedHeaders.includes(key.toLowerCase())) {
         headers.set(key, value);
       }
     });
