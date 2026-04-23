@@ -52,9 +52,14 @@ async function handleProxy(req: NextRequest) {
 
     // Forward the response headers (crucially including Set-Cookie)
     backendResponse.headers.forEach((value, key) => {
+      const lowerKey = key.toLowerCase();
       // Content-encoding should be handled by Next.js
-      if (key.toLowerCase() !== 'content-encoding') {
-        response.headers.append(key, value);
+      if (lowerKey !== 'content-encoding') {
+        if (lowerKey === 'set-cookie') {
+          response.headers.append(key, value);
+        } else {
+          response.headers.set(key, value);
+        }
       }
     });
 
