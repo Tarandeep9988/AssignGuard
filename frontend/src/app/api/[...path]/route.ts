@@ -55,10 +55,10 @@ async function handleProxy(req: NextRequest) {
     });
 
     // Forward the response headers (crucially including Set-Cookie)
+    // Exclude content-encoding (we decompressed the body) and content-length (length changed after decompression)
     backendResponse.headers.forEach((value, key) => {
       const lowerKey = key.toLowerCase();
-      // Content-encoding should be handled by Next.js
-      if (lowerKey !== 'content-encoding') {
+      if (lowerKey !== 'content-encoding' && lowerKey !== 'content-length') {
         if (lowerKey === 'set-cookie') {
           response.headers.append(key, value);
         } else {
