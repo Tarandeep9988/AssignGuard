@@ -25,6 +25,10 @@ async function handleProxy(req: NextRequest) {
       }
     });
 
+    // Next.js App Router's forEach omits 'cookie' for security — must forward it explicitly
+    const cookie = req.headers.get('cookie');
+    if (cookie) headers.set('cookie', cookie);
+
     const fetchOptions: RequestInit = {
       method: req.method,
       headers,
