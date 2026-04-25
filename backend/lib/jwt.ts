@@ -1,6 +1,8 @@
-import jwt, { Jwt, JwtPayload, SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
+
 import mongoose from 'mongoose';
-import { AppError } from '../utils/AppError';
+import { AppError } from '../utils/AppError.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 

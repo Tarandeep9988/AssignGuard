@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import * as z from "zod";
-import { AppError } from "../utils/AppError";
-import assignmentServices from "../services/assignment";
-import { sendResponse } from "../utils/Response";
+import { AppError } from "../utils/AppError.js";
+import assignmentServices from "../services/assignment.js";
+import { sendResponse } from "../utils/Response.js";
 
 // Handler to create a new assignment
 async function createAssignment(req: Request, res: Response, next: NextFunction) {
@@ -119,18 +119,18 @@ async function updateAssignment(req: Request, res: Response, next: NextFunction)
     }
     const { assignmentId, title, description, dueDate } = response.data;
 
-    const assignment = await assignmentServices.updateAssignment({
-      assignmentId,
-      userId: user._id,
-      title,
-      description,
-      dueDate: dueDate ? new Date(dueDate) : undefined,
-    });
+    // const assignment = await assignmentServices.updateAssignment({
+    //   assignmentId,
+    //   userId: user._id,
+    //   title,
+    //   description,
+    //   dueDate: dueDate ? new Date(dueDate) : undefined,
+    // });
 
     return sendResponse(res, {
       success: true,
-      message: "Assignment updated successfully",
-      data: { assignment },
+      message: "Not implemented yet",
+      data: { },
     }, 200);  
 
   } catch (error) {

@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
-import { AppError } from "../utils/AppError";
-import userServices from "../services/user";
-import { verifyToken } from "../lib/jwt";
+import type { NextFunction, Request, Response } from "express";
+import { AppError } from "../utils/AppError.js";
+import userServices from "../services/user.js";
+import { verifyToken } from "../lib/jwt.js";
 
 export async function authenticate(req : Request, res: Response, next: NextFunction) {
   try {

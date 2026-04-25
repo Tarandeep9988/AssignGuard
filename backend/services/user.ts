@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import User from "../models/User";
-import { AppError } from "../utils/AppError";
+import User from "../models/User.js";
+import { AppError } from "../utils/AppError.js";
 import bcrypt from "bcrypt";
 
 async function createUser({

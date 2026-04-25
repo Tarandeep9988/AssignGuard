@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import Submission from "../models/Submission";
-import { AppError } from "../utils/AppError";
+import Submission from "../models/Submission.js";
+import { AppError } from "../utils/AppError.js";
 
 // Create a new submission
 async function createSubmission({
@@ -100,11 +100,20 @@ async function deleteSubmission({
   return submission;
 }
 
+async function deleteSubmissionsByAssignment({
+  assignmentId,
+}: {
+  assignmentId: mongoose.Types.ObjectId | string;
+}) {
+  await Submission.deleteMany({ assignmentId });
+} 
+
 const submissionServices = {
   createSubmission,
   getSubmissionsByUser,
   getSubmissionById,
   getSubmissionsByAssignment,
+  deleteSubmissionsByAssignment,
   updateSubmission,
   deleteSubmission,
 };

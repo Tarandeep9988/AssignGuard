@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { sendResponse } from "../utils/Response";
+import type { Request, Response } from 'express';
+import { sendResponse } from "../utils/Response.js";
 
 export function healthCheckHandler(req : Request, res : Response) {
   return sendResponse(res, {

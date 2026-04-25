@@ -1,8 +1,8 @@
-import express from "express";
-import { authenticate, authorizeStudent, authorizeTeacher } from "../middlewares/auth";
-import submissionController from "../controllers/submission";
+import express, { type Router } from 'express';
+import { authenticate, authorizeStudent, authorizeTeacher } from "../middlewares/auth.js";
+import submissionController from "../controllers/submission.js";
 
-const submissionRouter = express.Router();
+const submissionRouter: Router = express.Router();
 
 // middleware to authenticate user
 submissionRouter.use(authenticate);

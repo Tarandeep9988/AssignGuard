@@ -1,9 +1,9 @@
-import { CookieOptions, NextFunction, Request, Response } from "express";
+import type { CookieOptions, NextFunction, Request, Response } from "express";
 import * as z from "zod";
-import { AppError } from "../utils/AppError";
-import userServices from "../services/user";
-import { signToken } from "../lib/jwt";
-import { sendResponse } from "../utils/Response";
+import { AppError } from "../utils/AppError.js";
+import userServices from "../services/user.js";
+import { signToken } from "../lib/jwt.js";
+import { sendResponse } from "../utils/Response.js";
 
 const setCookieOptions : CookieOptions = {
   httpOnly: true,

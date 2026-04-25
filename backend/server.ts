@@ -1,15 +1,15 @@
-import "./config/dotenv.ts"
+import "./config/dotenv.js"
 import express from "express";
-import { connectDb } from "./lib/db.ts";
-import submissionRouter from "./routes/submission.ts";
-import assignmentRouter from "./routes/assignment.ts";
-import healthRouter from "./routes/health.ts";
+import { connectDb } from "./lib/db.js";
+import submissionRouter from "./routes/submission.js";
+import assignmentRouter from "./routes/assignment.js";
+import healthRouter from "./routes/health.js";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import authRouter from "./routes/auth.ts";
+import authRouter from "./routes/auth.js";
 
-import { errorHandler } from "./middlewares/error.ts";
+import { errorHandler } from "./middlewares/error.js";
 
 await connectDb();
 
@@ -25,18 +25,18 @@ app.use(morgan("dev"));
 
 
 // routes
+app.use("/api/v1", healthRouter);
 app.use("/api/v1", authRouter);
 app.use("/api/v1", submissionRouter);
 app.use("/api/v1", assignmentRouter);
-app.use("/", healthRouter);
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Backend server is running",
-    data: null,
-  });
-});
+// app.get("/", (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: "Backend server is running",
+//     data: null,
+//   });
+// });
 
 // Error handling
 app.use(errorHandler);

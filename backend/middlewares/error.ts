@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import { AppError } from "../utils/AppError";
-import { sendResponse } from "../utils/Response";
+import type { NextFunction, Request, Response } from "express";
+import { AppError } from "../utils/AppError.js";
+import { sendResponse } from "../utils/Response.js";
 
 export async function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof AppError) {

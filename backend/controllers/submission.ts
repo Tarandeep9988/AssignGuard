@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import * as z from "zod";
-import { AppError } from "../utils/AppError";
-import submissionServices from "../services/submission";
+import { AppError } from "../utils/AppError.js";
+import submissionServices from "../services/submission.js";
 
 async function createSubmission(req: Request, res: Response, next: NextFunction) {
   try {

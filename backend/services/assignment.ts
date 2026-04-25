@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import Assignment from "../models/Assignment";
-import { AppError } from "../utils/AppError";
+import Assignment from "../models/Assignment.js";
+import { AppError } from "../utils/AppError.js";
+import submissionServices from "./submission.js";
 
 async function createAssignment({
   title,
@@ -92,6 +93,8 @@ async function deleteAssignment({
     _id: assignmentId,
     userId,
   });
+  // also delete corresponding submissions
+  await submissionServices.deleteSubmissionsByAssignment({ assignmentId });
   return assignment;
 }
 

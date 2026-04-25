@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { sendResponse } from "../utils/Response";
+import type { NextFunction, Request, Response } from "express";
+import { sendResponse } from "../utils/Response.js";
 
 async function getUserById(req: Request, res: Response, next: NextFunction) {
   try {
