@@ -16,5 +16,7 @@ async function getUserById(req: Request, res: Response, next: NextFunction) {
 }
 
 const userController = { 
-
+  getUserById
 };
+
+export default userController;
