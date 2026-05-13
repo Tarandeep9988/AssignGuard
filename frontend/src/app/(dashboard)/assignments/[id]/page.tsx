@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { getAssignmentById, getSubmissionsByAssignmentId } from '@/lib/mock-data';
+import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,36 +13,131 @@ import { SubmissionTable } from '@/components/submissions/SubmissionTable';
 import { Submission } from '@/lib/types';
 import { Calendar, FileText, AlertCircle } from 'lucide-react';
 
+interface Assignment {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  deadline: string;
+  creatorId: string;
+  createdAt: string;
+  totalSubmissions?: number;
+  averageSimilarity?: number;
+}
+
+interface Submission {
+  id: string;
+  assignmentId: string;
+  studentId: string;
+  studentName: string;
+  content: string;
+  submittedAt: string;
+  similarity: number;
+  status: 'submitted' | 'graded' | 'plagiarized';
+}
+
 export default function AssignmentDetailsPage() {
   const params = useParams();
   const assignmentId = params.id as string;
   const { user } = useAuth();
 
-  const assignment = getAssignmentById(assignmentId);
-  const submissions = getSubmissionsByAssignmentId(assignmentId);
-  const studentSubmission = submissions.find(s => s.studentId === user?.id);
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [studentSubmission, setStudentSubmission] = useState<Submission | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
   const [submissionText, setSubmissionText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Fetch assignment and submissions
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch assignment
+        const assignmentRes = await apiClient.getAssignmentById(assignmentId);
+        if (assignmentRes.success) {
+          setAssignment(assignmentRes.data);
+        } else {
+          throw new Error('Assignment not found');
+        }
+
+        // Fetch submissions (if teacher) or just the user's submission (if student)
+        if (user?.role === 'teacher') {
+          const submissionsRes = await apiClient.getSubmissionsByAssignment(assignmentId);
+          if (submissionsRes.success) {
+            setSubmissions(submissionsRes.data);
+          }
+        } else if (user) {
+          const userSubmissionsRes = await apiClient.getSubmissions();
+          if (userSubmissionsRes.success) {
+            const userSub = userSubmissionsRes.data.find((s: Submission) => s.assignmentId === assignmentId);
+            if (userSub) {
+              setStudentSubmission(userSub);
+            }
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error('Error fetching data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchData();
+    }
+  }, [assignmentId, user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock submission
-    setSubmissionText('');
-    setShowSubmissionForm(false);
-    alert('Submission successful! Your work has been submitted.');
+    if (!submissionText.trim()) {
+      alert('Please enter your submission');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await apiClient.createSubmission(assignmentId, { content: submissionText });
+      if (response.success) {
+        setStudentSubmission(response.data);
+        setSubmissionText('');
+        setShowSubmissionForm(false);
+        alert('Submission successful! Your work has been submitted.');
+      }
+    } catch (err) {
+      alert('Failed to submit: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  if (!assignment) {
+  if (isLoading) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground">Assignment not found</p>
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Loading assignment...</p>
       </div>
     );
   }
 
-  const isPastDeadline = assignment.deadline < new Date();
+  if (!assignment) {
+    return (
+      <div className="p-8">
+        <div className="bg-destructive/10 border border-destructive/50 text-destructive text-sm p-4 rounded">
+          {error || 'Assignment not found'}
+        </div>
+      </div>
+    );
+  }
+
+  const deadline = new Date(assignment.deadline);
+  const isPastDeadline = deadline < new Date();
 
   return (
     <div className="p-8">
@@ -68,7 +163,7 @@ export default function AssignmentDetailsPage() {
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Deadline</p>
                 <p className="font-semibold text-foreground">
-                  {assignment.deadline.toLocaleDateString()}
+                  {deadline.toLocaleDateString()}
                 </p>
                 {isPastDeadline && (
                   <p className="text-xs text-red-600 mt-1">Past deadline</p>

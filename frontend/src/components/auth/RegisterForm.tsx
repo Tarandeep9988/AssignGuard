@@ -47,7 +47,7 @@ export function RegisterForm() {
       };
 
       setUser(newUser);
-      router.push('/dashboard');
+      router.push('/');
     } catch (err) {
       setError('Registration failed. Please try again.');
     } finally {

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserRole } from '@/lib/types';
-import { MOCK_USERS } from '@/lib/mock-data';
 import Link from 'next/link';
 
 export function LoginForm() {
@@ -27,20 +26,11 @@ export function LoginForm() {
 
     try {
       await login(email, password, role);
-      router.push('/dashboard');
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleDemoLogin = (demoRole: UserRole) => {
-    const demoUser = MOCK_USERS.find(u => u.role === demoRole);
-    if (demoUser) {
-      setEmail(demoUser.email);
-      setPassword('demo');
-      setRole(demoRole);
     }
   };
 
@@ -122,36 +112,6 @@ export function LoginForm() {
           {isLoading ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-muted/30 text-muted-foreground">Try demo accounts</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => handleDemoLogin('student')}
-          className="text-xs"
-        >
-          Demo Student
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => handleDemoLogin('teacher')}
-          className="text-xs"
-        >
-          Demo Teacher
-        </Button>
-      </div>
 
       <div className="text-center">
         <p className="text-sm text-muted-foreground">

@@ -15,22 +15,22 @@ export function MobileSidebar() {
 
   const links = [
     {
-      href: '/dashboard',
+      href: '/',
       label: 'Dashboard',
       icon: BarChart3,
     },
     {
-      href: '/dashboard/assignments',
+      href: '/assignments',
       label: 'Assignments',
       icon: ClipboardList,
     },
     {
-      href: '/dashboard/submissions',
+      href: '/submissions',
       label: 'Submissions',
       icon: FileText,
     },
     {
-      href: '/dashboard/profile',
+      href: '/profile',
       label: 'Profile',
       icon: User,
     },
