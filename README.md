@@ -147,6 +147,20 @@ This launches the database, backend server, and frontend client with a single co
 
 ---
 
+## 🔑 Demo & Test Credentials
+
+For quick evaluation, you can log in with the following pre-configured demo credentials:
+
+### 🧑‍🏫 Teacher Account (Highly Used)
+* **Username:** `feynman@example.com` (Prof Feynman)
+* **Password:** `password123`
+
+### 🧑‍🎓 Student Account (Dynamically Registered)
+* **Username:** `fresh_student@example.com`
+* **Password:** `password123`
+
+---
+
 ## 🔒 Security Implementations
 
 *   **Cookie-based JWTs:** Tokens are stored as `HttpOnly`, `SameSite=Strict`, and `Secure` cookies to fully mitigate cross-site scripting (XSS) and cross-site request forgery (CSRF) token theft.
