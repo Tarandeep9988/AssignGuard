@@ -25,7 +25,7 @@ export default function LandingPage() {
         </h1>
         
         <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed px-4">
-          AssignGuard empowers educators to enforce academic integrity effortlessly, while providing students with a seamless and transparent submission experience.
+          PlagShield empowers educators to enforce academic integrity effortlessly, while providing students with a seamless and transparent submission experience.
         </p>
         
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto px-4 sm:px-0">

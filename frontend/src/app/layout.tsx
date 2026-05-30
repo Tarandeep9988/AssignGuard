@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Assign-Guard | Plagiarism Detection",
+  title: "PlagShield | Plagiarism Detection",
   description: "Secure assignment submission with built-in plagiarism detection.",
 };
 

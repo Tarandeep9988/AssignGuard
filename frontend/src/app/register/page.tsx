@@ -40,7 +40,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-3xl font-bold tracking-tight">Create an account</CardTitle>
-          <p className="text-muted-foreground text-sm">Join AssignGuard to manage your assignments</p>
+          <p className="text-muted-foreground text-sm">Join PlagShield to manage your assignments</p>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">

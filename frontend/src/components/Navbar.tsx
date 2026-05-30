@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from './ui/button';
-import { LogOut, BookOpen, Menu, X, FileText, LayoutDashboard } from 'lucide-react';
+import { LogOut, BookOpen, Menu, X, FileText, LayoutDashboard, Shield } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export function Navbar() {
@@ -21,8 +21,8 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl shrink-0">
-            <BookOpen className="w-6 h-6 animate-pulse" />
-            AssignGuard
+            <Shield className="w-6 h-6 animate-pulse" />
+            PlagShield
           </Link>
 
           {/* Desktop Navigation Links */}

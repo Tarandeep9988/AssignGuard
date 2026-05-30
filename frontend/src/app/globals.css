@@ -17,15 +17,15 @@
 
 @layer base {
   :root {
-    --background: #0f1115;
-    --foreground: #f8fafc;
-    --card: #15181e;
-    --card-foreground: #f8fafc;
-    --primary: #6366f1;
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #1e293b;
+    --primary: #4f46e5;
     --primary-foreground: #ffffff;
-    --border: #262a33;
-    --input: #262a33;
-    --ring: #6366f1;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #4f46e5;
     --radius: 0.75rem;
   }
   
